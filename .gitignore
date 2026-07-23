@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Local editor and tool state
+.idea/
+.vscode/
+*.swp
+
+# Build and dependency output
+node_modules/
+dist/
+build/
+target/
+coverage/
