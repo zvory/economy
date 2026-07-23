@@ -6,7 +6,7 @@ The game design, technical architecture, and implementation stack are intentiona
 Project-specific decisions should be documented as they are made rather than inherited from an
 unrelated game.
 
-See [`CLAUDE.md`](CLAUDE.md) for repository guidance and
-[`docs/context/planning.md`](docs/context/planning.md) for the multi-phase planning convention.
-The pull-request lifecycle is documented in
-[`docs/pr-first-workflow.md`](docs/pr-first-workflow.md).
+See [`docs/design/economic-model.md`](docs/design/economic-model.md) for the first gameplay design
+requirements, [`CLAUDE.md`](CLAUDE.md) for repository guidance, and
+[`docs/context/planning.md`](docs/context/planning.md) for the multi-phase planning convention. The
+pull-request lifecycle is documented in [`docs/pr-first-workflow.md`](docs/pr-first-workflow.md).
