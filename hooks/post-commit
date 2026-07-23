@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+"$repo_root/scripts/cleanup-worktrees.sh" --auto || {
+  echo "post-commit: worktree cleanup skipped after an error" >&2
+}

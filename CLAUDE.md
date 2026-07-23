@@ -19,7 +19,8 @@ that spans multiple files or systems, update its design document and all impleme
 - For requests to investigate, review, audit, scout, or confirm, inspect and report. Keep the pass
   read-only unless the user also requests a change.
 - A request to build, change, or fix authorizes the complete normal delivery workflow: make the
-  in-scope edits, run focused non-destructive validation, and commit the task on its branch.
+  in-scope edits, run focused non-destructive validation, commit the task, and—when an `origin`
+  GitHub remote exists—open an owned PR, arm auto-merge, and wait for the merge.
 - Base claims about current gameplay, architecture, tests, deployments, and repository state on
   current evidence rather than memory.
 - Ask before destructive actions, direct pushes to the default branch, or material scope expansion.
@@ -28,10 +29,11 @@ that spans multiple files or systems, update its design document and all impleme
 ## Editing and Git workflow
 
 Read-only inspection may use the current checkout. Before editing an established repository, work
-in a clean task-specific worktree based on the current remote default branch. If no remote exists
-yet, use a task branch in the local repository and do not invent remote or pull-request steps.
+in a clean task-specific worktree based on the current remote default branch. Store task worktrees
+under `/tmp/economy-worktrees/`. If no remote exists yet, use a task branch in the local repository
+and do not invent remote or pull-request steps.
 
-- Use short, descriptive branch names.
+- Name agent task branches `agent/<short-task-name>`.
 - Parallel writers must use separate worktrees and branches.
 - Use focused checks during development and the full test suite appropriate to the changed area
   before integration.
@@ -39,6 +41,21 @@ yet, use a task branch in the local repository and do not invent remote or pull-
   nuance, or non-obvious reasoning deserves explanation.
 - Do not claim a push, pull request, deployment, or merge unless current Git or hosting evidence
   confirms it.
+- Once the remote PR workflow exists, finish requested builds, changes, and fixes with
+  `scripts/agent-pr.sh --verification "<focused checks passed>"`, then
+  `scripts/wait-pr.sh <pr>`. See `docs/pr-first-workflow.md`.
+
+## Repository workflow
+
+- Run `scripts/install-hooks.sh` once per clone.
+- Tracked pre-commit and pre-merge hooks run cheap staged-diff and workflow checks.
+- Post-commit and post-merge hooks clean only clean, merged `agent/*` worktrees beneath
+  `/tmp/economy-worktrees/`.
+- `scripts/agent-pr.sh` runs configured specialist passes and a final autonomous adversarial review
+  before it opens or updates a PR.
+- `scripts/agent-pr-passes.json` starts empty. Add game-specific passes only after this project
+  establishes the corresponding workflow.
+- `scripts/verify-workflows.sh` validates the workflow scaffold locally without GitHub or Codex.
 
 ## Documentation
 

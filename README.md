@@ -8,3 +8,5 @@ unrelated game.
 
 See [`CLAUDE.md`](CLAUDE.md) for repository guidance and
 [`docs/context/planning.md`](docs/context/planning.md) for the multi-phase planning convention.
+The pull-request lifecycle is documented in
+[`docs/pr-first-workflow.md`](docs/pr-first-workflow.md).

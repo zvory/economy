@@ -75,4 +75,5 @@ remote default branch before continuing.
 When every phase is done, move the complete directory to `plans/archive/<short-name>/`. Archived
 plans are historical evidence, not source-of-truth product policy. If an archived rule remains
 valid, place it in the relevant active document under `docs/` and make automation depend on that
-active source.
+active source. During PR delivery, `scripts/agent-pr.sh` automatically archives a plan when the
+branch changes at least one phase to `Status: Done` and every phase in that plan is done.

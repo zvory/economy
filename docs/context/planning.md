@@ -42,6 +42,7 @@ numeric phase cap.
   reachable from the remote default branch before reporting it complete.
 - When a phase is complete, mark its phase document done in that phase's implementation commit.
 - After every phase is complete, move the plan to `plans/archive/<short-name>/` as part of the final
-  integration or a small follow-up commit.
+  integration or a small follow-up commit. Once the remote PR workflow is active,
+  `scripts/agent-pr.sh` detects and commits this transition automatically.
 
 See [`plans/README.md`](../../plans/README.md) for the full convention and a phase-file template.
