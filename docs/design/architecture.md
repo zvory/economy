@@ -27,6 +27,10 @@
 - **Dev scenarios:** High-level gameplay regression tests called dev scenarios exercise the public
   game-core interface deterministically. The same scenario can run headlessly or be loaded and
   visualized in a game client without changing its setup, actions, or assertions.
+- **Top-level structure:** `clients/` contains multiple clients, such as the API, CLI, and UI;
+  `server/` contains the server; and `engine/` contains the economic simulator as a library.
+- **Per-game metrics:** Every game starts its own ephemeral metrics stack so agents and humans can
+  easily inspect what is happening inside the engine and elsewhere in the game.
 
 ## Decisions still open
 
