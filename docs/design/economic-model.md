@@ -1,5 +1,7 @@
 # Economic model
 
+- The current implementation target is the
+  [fully planned physical-economy MVP](economic-model-mvp.md).
 - The game needs an economic model, including support for economic crashes. The details are still
   undecided.
 - The economy is a cyclic network of inputs and outputs, not a directed acyclic graph. Producers
