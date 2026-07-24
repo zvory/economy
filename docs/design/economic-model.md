@@ -10,7 +10,7 @@
   satisfy that demand request the intermediate products they require, propagating orders through
   the production network over time rather than resolving the entire chain instantaneously.
 - Raw-resource extraction is part of the production network rather than a terminal source with no
-  requirements. Activities such as mining require inputs including labor and transportation.
+  requirements. Activities such as mining require inputs including labor.
 - Players can inspect the production network and its demand, input, and output relationships in
   multiple forms.
 - Changes in sector funding should take time to work through the economy. If rail funding suddenly
