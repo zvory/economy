@@ -101,8 +101,8 @@ than engine code dedicated to food, wood, basic tools, or furniture.
 ### Sector expansion
 
 - The player must be able to order a capacity upgrade for a sector.
-- The UI may present standardized capacity increments as sector levels, such as “Primitive
-  Furniture Sector — Level 2.”
+- The UI may present standardized capacity increments as Factory levels, such as “Primitive
+  Furniture Factory — Level 2.”
 - The engine must store actual capacity and upgrade progress rather than relying on a hardcoded
   meaning for a level number.
 - An upgrade must take a data-defined whole number of weeks and become productive only when
