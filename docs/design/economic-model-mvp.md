@@ -20,7 +20,9 @@ allocation conflicts.
 
 Population is aggregate. There are no individual people, households, voluntary job choices, or
 special peasant agents. A peasant is labor assigned to farming; an industrial worker is labor
-assigned to an industrial sector.
+assigned to an industrial sector. An unmet food requirement permanently reduces aggregate
+population and therefore the economy's total labor capacity. The MVP does not distinguish whether
+that loss represents death, emigration, or another cause.
 
 Food is an ordinary good. A farm is an ordinary production sector. The farm itself does not consume
 the food allocated to the people working there. If one farm worker produces only slightly more food
@@ -41,13 +43,14 @@ It must define at least these sectors:
 
 | Sector | Required inputs | Output |
 | --- | --- | --- |
-| Farm | Labor | Food |
+| Farm | Labor, with optional recurring basic-tool support | Food |
 | Logging | Labor | Wood |
 | Basic-tool production | Labor and wood | Basic tools |
 | Furniture manufacturing | Labor and wood | Furniture |
 
-Basic tools must be allocatable to farms. A farm's food output per unit of labor must increase
-according to a data-defined rule when it has basic tools.
+Basic tools must be allocatable to farms as a recurring weekly support input. Tools supplied to a
+farm are consumed that week, and the farm's food output per unit of labor must increase according
+to a data-defined rule. Basic tools must also be consumable by sector-capacity upgrades.
 
 Goods, sectors, recipes, labor-efficiency coefficients, and capacities must be content data rather
 than engine code dedicated to food, wood, basic tools, or furniture.
@@ -56,26 +59,38 @@ than engine code dedicated to food, wood, basic tools, or furniture.
 
 ### Population and labor
 
-- The simulation must track aggregate total population and its assignment among sectors.
+- The simulation must track aggregate total population and its assignment among production sectors,
+  active construction projects, and an unassigned pool.
 - Each production must have a data-defined labor-efficiency coefficient. The coefficient converts
   assigned population into effective labor and includes factors such as the share of the population
   that initially performs productive work and time lost because of poor housing or access to work.
-- Population cannot be assigned to more than one sector in the same week.
-- The player must be able to set target labor assignments directly.
+- Population cannot be assigned to more than one production or construction use in the same week.
+- The player must be able to set target labor assignments among production sectors, active
+  construction projects, and the unassigned pool directly.
 - Actual assignments must move toward the targets at a configurable maximum weekly reassignment
   rate. Command authority removes worker choice, but it does not remove administrative delay.
 - The engine must report current assignment, target assignment, reassignment in progress, and any
   target that cannot be filled.
+- When population falls, the loss must be applied deterministically to the population groups that
+  did not receive their food requirement. Current assignments must fall with those groups; labor
+  targets remain directives and may consequently become unfillable.
 
 ### Final demand
 
-- The central planner must be able to set desired allocations of consumer goods to sectors.
+- Every population unit must create the same data-defined baseline food requirement each week,
+  regardless of its assignment. The requirement is mandatory rather than chosen by the player.
+- The central planner must be able to allocate available food among population grouped by current
+  assignment, including unassigned population.
+- At the end of the documented weekly phase, an unmet food requirement must permanently reduce the
+  affected group's population according to a data-defined rule. The loss must reduce aggregate
+  population and future labor capacity; the MVP does not model recovery of lost population.
+- The central planner must be able to set desired allocations of other consumer goods to sectors.
 - Goods allocated to the people assigned to a sector may improve that production's labor-efficiency
   coefficient according to data-defined rules. This represents effects such as workers spending
   less time providing for themselves or losing less time because of poor living and working
   conditions.
-- Final demand must not vary automatically based on whether population is assigned to farming,
-  logging, or factory work.
+- The food required per population unit must not vary based on whether population is assigned to
+  farming, logging, factory work, construction, or no work.
 - Food must use the same planned allocation mechanism as other consumer goods.
 - Supplied allocations must be recorded as satisfied demand. Unsupplied quantities must be recorded
   as unmet demand.
@@ -105,10 +120,15 @@ than engine code dedicated to food, wood, basic tools, or furniture.
   Furniture Factory — Level 2.”
 - The engine must store actual capacity and upgrade progress rather than relying on a hardcoded
   meaning for a level number.
-- An upgrade must take a data-defined whole number of weeks and become productive only when
-  complete.
-- Construction goods, construction labor, financing, and investment efficiency are not required
-  for the MVP. Upgrade time is the initial constraint.
+- Each upgrade must have data-defined total labor and basic-tool requirements.
+- The player must be able to allocate population and basic tools to an active upgrade each week.
+  Construction labor cannot simultaneously work in a production sector, and supplied tools are
+  consumed exactly once as progress is recorded.
+- An upgrade must record cumulative labor and tool progress and become productive only when both
+  requirements are complete. The initial scenario must tune those requirements so an upgrade takes
+  multiple weeks and requires a meaningful diversion of labor and tools from current production.
+- A separate construction sector, specialized construction materials, financing, and investment
+  efficiency are not required for the MVP.
 
 ### Inventories and orders
 
@@ -118,6 +138,8 @@ than engine code dedicated to food, wood, basic tools, or furniture.
 - Unfilled orders must remain inspectable. The implementation must not silently discard shortages.
 - The player must be able to set allocation priorities or shares when multiple uses compete for a
   scarce inventory.
+- Farm support and construction must compete through this allocation mechanism when both request
+  scarce basic tools.
 - Allocation must be deterministic. Capacity left unused by a high-priority use should be
   available to other eligible demand rather than being wasted solely because of its configured
   share.
@@ -136,9 +158,10 @@ The public game-core interface must allow a client to:
 - Advance the simulation by a weekly tick.
 - Pause or refrain from requesting additional ticks.
 - Set sector production targets.
-- Set target labor assignments.
+- Set target labor assignments among production sectors, construction projects, and the unassigned
+  pool.
 - Order sector-capacity upgrades.
-- Allocate goods among sectors and final uses.
+- Allocate goods among production support, construction, and final uses.
 - Set priorities or shares for scarce inventories.
 - Inspect the full economic state required to make those decisions.
 
@@ -154,12 +177,12 @@ came from a human player or a future automated planner.
 
 - Simulation time advances only in discrete weekly ticks.
 - Commands must have an authoritative order and take effect at a documented weekly phase.
-- Production, order creation, goods allocation, demand fulfillment, labor reassignment, and upgrade
-  progress must have a single documented phase order.
+- Production, order creation, goods allocation, demand fulfillment, food-shortfall population loss,
+  labor reassignment, and upgrade progress must have a single documented phase order.
 - Goods produced during a week must not satisfy an upstream or downstream requirement earlier than
   the documented phase order permits.
-- All gameplay-relevant state, including orders, allocation directives, labor transitions, upgrade
-  progress, and deterministic-generator state, must be serializable.
+- All gameplay-relevant state, including population by assignment, orders, allocation directives,
+  labor transitions, upgrade progress, and deterministic-generator state, must be serializable.
 - Saving and restoring at a stable point must not change subsequent results.
 - The same initial state and ordered commands must produce the same state and trace.
 
@@ -167,8 +190,9 @@ came from a human player or a future automated planner.
 
 At any stable weekly state, clients must be able to inspect:
 
-- Population, current and target sector assignments, and labor-efficiency coefficients
-- Sector capacity, upgrade progress, recipes, targets, and actual production
+- Population, weekly population loss, current and target assignments, and labor-efficiency
+  coefficients
+- Sector capacity, upgrade labor and tool progress, recipes, targets, and actual production
 - Aggregate inventory by good
 - Open and filled orders and the demand that caused them
 - Planned consumer-goods allocations and their effects on labor efficiency
@@ -181,18 +205,23 @@ The MVP is complete only when deterministic dev scenarios verify all of the foll
 public game-core interface:
 
 1. **Agrarian constraint:** With farm productivity only slightly above food demand per population
-   unit, moving too much labor out of farming causes a measurable food shortage.
+   unit, moving too much labor out of farming causes a measurable food shortage and a permanent,
+   deterministic reduction in aggregate population and labor capacity.
 2. **Industrialization:** Reassigning labor and expanding productive capacity increases basic-tool
-   or furniture production when the required wood is available.
+   or furniture production when the required wood is available. An expansion completes only after
+   receiving its full labor and basic-tool requirements over multiple weeks.
 3. **Input propagation:** Final demand creates a final-good requirement, which creates raw-material
    requirements over time without instantaneously resolving the entire chain.
-4. **Basic tools:** Allocating basic tools to farms increases food output from the same labor
-   assignment according to the configured productivity rule.
+4. **Basic tools:** Allocating basic tools to farms consumes those tools each week and increases
+   food output from the same labor assignment according to the configured productivity rule.
 5. **Production constraint:** Production remains bounded by assigned labor, inputs, and capacity.
 6. **Conservation:** Goods are neither duplicated nor lost outside declared recipe conversions and
-   final delivery.
+   final delivery, recurring farm support, and construction progress.
 7. **Replay and restoration:** A saved-and-restored run and a replay of the same commands reach the
    same authoritative state and produce the same trace.
+8. **Competing tool uses:** When farms and construction request more basic tools than are available,
+   the configured allocation rule deterministically divides the tools and both uses expose their
+   resulting output or progress.
 
 ## Explicitly deferred
 
@@ -202,12 +231,13 @@ The following are not part of the economic-model MVP:
 - Market clearing and price-responsive demand
 - Autonomous firms, supplier choice, and autonomous investment
 - Advanced agricultural machinery and autonomous capital investment
-- Individual people, households, demographic change, migration, and voluntary employment choice
+- Individual people, households, births, aging, explicit migration flows, and voluntary employment
+  choice
 - Land ownership, rents, enclosure, coercion consequences, unrest, and politics
 - Detailed worker skills, occupations, education, and retraining
 - Power, fuel, maintenance, spoilage, resource depletion, and seasonal production
 - Product quality, substitution, multiple production technologies, and consumer preference models
-- Construction-material supply chains and construction-sector labor
+- Specialized construction-material supply chains and a separate construction sector
 - Economic crashes, recessions, banking crises, and endogenous business cycles
 - A production graphical UI beyond the public commands and observations needed by interchangeable
   clients
